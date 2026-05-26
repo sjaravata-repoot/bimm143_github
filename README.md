@@ -3,7 +3,7 @@ My classwork from [BIMM143 at UC San Diego Spring 2026](https://bioboot.github.i
 
 ## Index of Classes
 
-Class 4: [Introduction to R](class04/class04.pdf)
+Class 4: [Introduction to R](class04/class04.md)
 
 Class 5: [Data viz with ggplot2](class05/class05.md)
 
@@ -23,5 +23,5 @@ Class 12: [Genome informatics and high throughput sequencing](class12/class12.md
 
 Class 13: [Transcriptomics, RNA-Seq analysis, and the interpretation of gene lists](class13/class13.md)
 
-Class 14: [Project: RNA-Seq mini project](class13/class13.md)
+Class 14: [Project: RNA-Seq mini project](class14/class14.md)
 
