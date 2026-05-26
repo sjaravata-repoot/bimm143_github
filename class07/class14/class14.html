@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Sofia Jaravata (A19160915)">
+
+<title>Class 14: RNASeq mini-project</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="class14_files/libs/clipboard/clipboard.min.js"></script>
+<script src="class14_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="class14_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="class14_files/libs/quarto-html/popper.min.js"></script>
+<script src="class14_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="class14_files/libs/quarto-html/anchor.min.js"></script>
+<link href="class14_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="class14_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="class14_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="class14_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="class14_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
+  <li><a href="#data-import" id="toc-data-import" class="nav-link" data-scroll-target="#data-import">Data Import</a>
+  <ul class="collapse">
+  <li><a href="#sanity-check" id="toc-sanity-check" class="nav-link" data-scroll-target="#sanity-check">Sanity Check</a></li>
+  </ul></li>
+  <li><a href="#setup-deseq-object" id="toc-setup-deseq-object" class="nav-link" data-scroll-target="#setup-deseq-object">Setup DESeq object</a></li>
+  <li><a href="#run-deseq-analysis" id="toc-run-deseq-analysis" class="nav-link" data-scroll-target="#run-deseq-analysis">Run DESeq analysis</a></li>
+  <li><a href="#extract-the-results" id="toc-extract-the-results" class="nav-link" data-scroll-target="#extract-the-results">Extract the results</a></li>
+  <li><a href="#data-visualization" id="toc-data-visualization" class="nav-link" data-scroll-target="#data-visualization">Data visualization</a></li>
+  <li><a href="#add-annotation-data" id="toc-add-annotation-data" class="nav-link" data-scroll-target="#add-annotation-data">Add annotation data</a></li>
+  <li><a href="#pathway-analysis" id="toc-pathway-analysis" class="nav-link" data-scroll-target="#pathway-analysis">Pathway Analysis</a>
+  <ul class="collapse">
+  <li><a href="#reactome" id="toc-reactome" class="nav-link" data-scroll-target="#reactome">REACTOME</a></li>
+  </ul></li>
+  <li><a href="#save-our-results" id="toc-save-our-results" class="nav-link" data-scroll-target="#save-our-results">Save our results</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Class 14: RNASeq mini-project</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Sofia Jaravata (A19160915) </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+</section>
+<section id="data-import" class="level2">
+<h2 class="anchored" data-anchor-id="data-import">Data Import</h2>
+<p>Read counts and metadata CSV files</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DESeq2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'DESeq2' was built under R version 4.5.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'S4Vectors' was built under R version 4.5.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'BiocGenerics' was built under R version 4.5.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'IRanges' was built under R version 4.5.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'GenomicRanges' was built under R version 4.5.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'Seqinfo' was built under R version 4.5.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'SummarizedExperiment' was built under R version 4.5.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'MatrixGenerics' was built under R version 4.5.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'Biobase' was built under R version 4.5.3</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>metaFile <span class="ot">&lt;-</span> <span class="st">"GSE37704_metadata.csv"</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>countFile <span class="ot">&lt;-</span> <span class="st">"GSE37704_featurecounts.csv"</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Import metadata and take a peek</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>colData <span class="ot">=</span> <span class="fu">read.csv</span>(metaFile, <span class="at">row.names=</span><span class="dv">1</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(colData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              condition
+SRR493366 control_sirna
+SRR493367 control_sirna
+SRR493368 control_sirna
+SRR493369      hoxa1_kd
+SRR493370      hoxa1_kd
+SRR493371      hoxa1_kd</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>countData <span class="ot">=</span> <span class="fu">read.csv</span>(countFile, <span class="at">row.names=</span><span class="dv">1</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(countData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                length SRR493366 SRR493367 SRR493368 SRR493369 SRR493370
+ENSG00000186092    918         0         0         0         0         0
+ENSG00000279928    718         0         0         0         0         0
+ENSG00000279457   1982        23        28        29        29        28
+ENSG00000278566    939         0         0         0         0         0
+ENSG00000273547    939         0         0         0         0         0
+ENSG00000187634   3214       124       123       205       207       212
+                SRR493371
+ENSG00000186092         0
+ENSG00000279928         0
+ENSG00000279457        46
+ENSG00000278566         0
+ENSG00000273547         0
+ENSG00000187634       258</code></pre>
+</div>
+</div>
+<section id="sanity-check" class="level3">
+<h3 class="anchored" data-anchor-id="sanity-check">Sanity Check</h3>
+<blockquote class="blockquote">
+<p>Q. Complete the code below to remove the troublesome first column from countData</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>countData <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(countData[ ,<span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(countData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                SRR493366 SRR493367 SRR493368 SRR493369 SRR493370 SRR493371
+ENSG00000186092         0         0         0         0         0         0
+ENSG00000279928         0         0         0         0         0         0
+ENSG00000279457        23        28        29        29        28        46
+ENSG00000278566         0         0         0         0         0         0
+ENSG00000273547         0         0         0         0         0         0
+ENSG00000187634       124       123       205       207       212       258</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Q. Complete the code below to filter countData to exclude genes (i.e.&nbsp;rows) where we have 0 read count across all samples (i.e.&nbsp;columns).</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>countData <span class="ot">=</span> countData[<span class="fu">rowSums</span>(countData) <span class="sc">&gt;</span> <span class="dv">0</span>, ]</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(countData)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                SRR493366 SRR493367 SRR493368 SRR493369 SRR493370 SRR493371
+ENSG00000279457        23        28        29        29        28        46
+ENSG00000187634       124       123       205       207       212       258
+ENSG00000188976      1637      1831      2383      1226      1326      1504
+ENSG00000187961       120       153       180       236       255       357
+ENSG00000187583        24        48        65        44        48        64
+ENSG00000187642         4         9        16        14        16        16</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="setup-deseq-object" class="level2">
+<h2 class="anchored" data-anchor-id="setup-deseq-object">Setup DESeq object</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>metadata</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>standardGeneric for "metadata" defined from package "S4Vectors"
+
+function (x, ...) 
+standardGeneric("metadata")
+&lt;bytecode: 0x10d0c89f0&gt;
+&lt;environment: 0x10d0c34a8&gt;
+Methods may be defined for arguments: x
+Use  showMethods(metadata)  for currently available ones.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DESeq2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>dds <span class="ot">=</span> <span class="fu">DESeqDataSetFromMatrix</span>(<span class="at">countData =</span> countData,</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                             <span class="at">colData =</span> colData,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">design =</span> <span class="sc">~</span> condition)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in DESeqDataSet(se, design = design, ignoreRank): some variables in
+design formula are characters, converting to factors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>dds <span class="ot">=</span> <span class="fu">DESeq</span>(dds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>estimating size factors</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>estimating dispersions</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>gene-wise dispersion estimates</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>mean-dispersion relationship</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>final dispersion estimates</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>fitting model and testing</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>dds </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class: DESeqDataSet 
+dim: 15975 6 
+metadata(1): version
+assays(4): counts mu H cooks
+rownames(15975): ENSG00000279457 ENSG00000187634 ... ENSG00000276345
+  ENSG00000271254
+rowData names(22): baseMean baseVar ... deviance maxCooks
+colnames(6): SRR493366 SRR493367 ... SRR493370 SRR493371
+colData names(2): condition sizeFactor</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">=</span> <span class="fu">results</span>(dds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="run-deseq-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="run-deseq-analysis">Run DESeq analysis</h2>
+<blockquote class="blockquote">
+<p>Q. Call the summary() function on your results to get a sense of how many genes are up or down-regulated at the default 0.1 p-value cutoff.</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+out of 15975 with nonzero total read count
+adjusted p-value &lt; 0.1
+LFC &gt; 0 (up)       : 4349, 27%
+LFC &lt; 0 (down)     : 4396, 28%
+outliers [1]       : 0, 0%
+low counts [2]     : 1237, 7.7%
+(mean count &lt; 0)
+[1] see 'cooksCutoff' argument of ?results
+[2] see 'independentFiltering' argument of ?results</code></pre>
+</div>
+</div>
+</section>
+<section id="extract-the-results" class="level2">
+<h2 class="anchored" data-anchor-id="extract-the-results">Extract the results</h2>
+<p>Big table with log2 fold changes and p-values</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">results</span>(dds, <span class="at">contrast =</span> <span class="fu">c</span>(<span class="st">"condition"</span>, <span class="st">"hoxa1_kd"</span>, <span class="st">"control_sirna"</span>))</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log2 fold change (MLE): condition hoxa1_kd vs control_sirna 
+Wald test p-value: condition hoxa1 kd vs control sirna 
+DataFrame with 6 rows and 6 columns
+                 baseMean log2FoldChange     lfcSE       stat      pvalue
+                &lt;numeric&gt;      &lt;numeric&gt; &lt;numeric&gt;  &lt;numeric&gt;   &lt;numeric&gt;
+ENSG00000279457   29.9136      0.1792571 0.3248215   0.551863 5.81042e-01
+ENSG00000187634  183.2296      0.4264571 0.1402658   3.040350 2.36304e-03
+ENSG00000188976 1651.1881     -0.6927205 0.0548465 -12.630156 1.43993e-36
+ENSG00000187961  209.6379      0.7297556 0.1318599   5.534326 3.12428e-08
+ENSG00000187583   47.2551      0.0405765 0.2718928   0.149237 8.81366e-01
+ENSG00000187642   11.9798      0.5428105 0.5215598   1.040744 2.97994e-01
+                       padj
+                  &lt;numeric&gt;
+ENSG00000279457 6.86555e-01
+ENSG00000187634 5.15718e-03
+ENSG00000188976 1.76553e-35
+ENSG00000187961 1.13413e-07
+ENSG00000187583 9.19031e-01
+ENSG00000187642 4.03379e-01</code></pre>
+</div>
+</div>
+</section>
+<section id="data-visualization" class="level2">
+<h2 class="anchored" data-anchor-id="data-visualization">Data visualization</h2>
+<p>Volcano plot</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'ggplot2' was built under R version 4.5.2</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(res) <span class="sc">+</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(log2FoldChange, <span class="sc">-</span>padj) <span class="sc">+</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1237 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="class14_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Q. Improve this plot by completing the below code, which adds color, axis labels and cutoff lines:</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>mycols <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="st">"grat"</span>, <span class="fu">nrow</span>(res))</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>mycols[ <span class="fu">abs</span>(res<span class="sc">$</span>log2FoldChange) <span class="sc">&gt;</span> <span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="st">"blue"</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>mycols[ ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    [1] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+   [11] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+   [21] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+   [31] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+   [41] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+   [51] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+   [61] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+   [71] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+   [81] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+   [91] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+  [101] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [111] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [121] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [131] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "blue"
+  [141] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [151] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [161] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [171] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+  [181] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [191] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [201] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [211] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [221] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [231] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+  [241] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [251] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+  [261] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+  [271] "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+  [281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [291] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [301] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [311] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [321] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [331] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+  [341] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [351] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [361] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+  [371] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [381] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+  [391] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+  [401] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+  [411] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [421] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [431] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [441] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [451] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [461] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [471] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [481] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+  [491] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [501] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+  [511] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+  [521] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [531] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+  [541] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+  [551] "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "blue" "grat"
+  [561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+  [571] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [591] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [601] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [611] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [621] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [631] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [641] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+  [651] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [661] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+  [671] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [681] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+  [691] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [701] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [711] "blue" "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+  [721] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+  [731] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [741] "grat" "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+  [751] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+  [761] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [771] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [781] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [791] "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+  [801] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [811] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [821] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+  [831] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [841] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+  [851] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [861] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [871] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+  [881] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat"
+  [891] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [901] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [911] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+  [921] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+  [931] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+  [941] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [951] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [961] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [971] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+  [981] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+  [991] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1001] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1011] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1031] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1041] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [1051] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat"
+ [1061] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1071] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1081] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1101] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [1111] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1121] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [1131] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1141] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1151] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [1161] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1181] "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1191] "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1201] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1211] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1221] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [1231] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [1241] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1251] "grat" "grat" "grat" "grat" "blue" "grat" "blue" "blue" "grat" "grat"
+ [1261] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1291] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1301] "grat" "blue" "blue" "grat" "grat" "grat" "grat" "blue" "blue" "blue"
+ [1311] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [1321] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [1331] "blue" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "blue"
+ [1341] "grat" "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [1351] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1361] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1371] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1381] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [1391] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1401] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "blue"
+ [1411] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [1421] "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "blue" "grat"
+ [1431] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "blue"
+ [1441] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [1451] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [1461] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1471] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1481] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1491] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1501] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [1511] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1521] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1531] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1541] "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [1551] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1571] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [1591] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [1601] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1611] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1621] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [1631] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [1641] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1651] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [1661] "grat" "blue" "blue" "grat" "grat" "grat" "blue" "grat" "grat" "blue"
+ [1671] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [1681] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [1691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1711] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1721] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [1731] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1741] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1751] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1761] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1771] "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1781] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue"
+ [1791] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1801] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1811] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1821] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1831] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1841] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1851] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1861] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1871] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1881] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1891] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1901] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1911] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [1921] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1931] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1941] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [1951] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1961] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1971] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1981] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [1991] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [2001] "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2011] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2031] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [2041] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2051] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [2061] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2071] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2081] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [2101] "grat" "blue" "grat" "grat" "blue" "blue" "blue" "blue" "blue" "blue"
+ [2111] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2121] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2131] "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat"
+ [2141] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2151] "grat" "grat" "grat" "grat" "grat" "blue" "blue" "blue" "grat" "grat"
+ [2161] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2181] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2191] "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat"
+ [2201] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2211] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2221] "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat"
+ [2231] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "blue"
+ [2241] "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2251] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [2261] "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat" "grat" "grat"
+ [2271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2291] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2301] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "blue"
+ [2311] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [2321] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2331] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [2341] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2351] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2361] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2371] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2381] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "blue" "grat"
+ [2391] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2401] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2411] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2421] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2431] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2441] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2451] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [2461] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2471] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [2481] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2491] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [2501] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2511] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2521] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2531] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2541] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [2551] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2561] "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "blue"
+ [2571] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [2581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2591] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [2601] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [2611] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [2621] "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2631] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2641] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2651] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2661] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2671] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [2681] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [2711] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2721] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2731] "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2741] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2751] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [2761] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2771] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [2781] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2791] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2801] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [2811] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2821] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [2831] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [2841] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2851] "grat" "grat" "grat" "grat" "blue" "grat" "blue" "blue" "grat" "grat"
+ [2861] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2871] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [2881] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2891] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2901] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2911] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [2921] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2931] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2941] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2951] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2961] "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat"
+ [2971] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2981] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [2991] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3001] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [3011] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3031] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3041] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3051] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3061] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [3071] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3081] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [3091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3101] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3111] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [3121] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3131] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3141] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3151] "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat"
+ [3161] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3181] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3191] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [3201] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3211] "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat"
+ [3221] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3231] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3241] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3251] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3261] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [3271] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3291] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3301] "grat" "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat"
+ [3311] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3321] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3331] "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3341] "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat" "grat" "grat"
+ [3351] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [3361] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3371] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3381] "blue" "grat" "blue" "blue" "grat" "grat" "blue" "blue" "grat" "grat"
+ [3391] "blue" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [3401] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3411] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [3421] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3431] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3441] "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3451] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3461] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3471] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [3481] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3491] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3501] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3511] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [3521] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3531] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat"
+ [3541] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat"
+ [3551] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3561] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3571] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3591] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3601] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [3611] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3621] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3631] "grat" "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat"
+ [3641] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3651] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3661] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3671] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3681] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat"
+ [3691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3711] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [3721] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3731] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat"
+ [3741] "grat" "blue" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat"
+ [3751] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3761] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat"
+ [3771] "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [3781] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [3791] "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat"
+ [3801] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3811] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [3821] "grat" "blue" "blue" "blue" "blue" "grat" "blue" "blue" "blue" "grat"
+ [3831] "blue" "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3841] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3851] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [3861] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3871] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [3881] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3891] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3901] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [3911] "blue" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [3921] "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat"
+ [3931] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3941] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3951] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [3961] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3971] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3981] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [3991] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "blue"
+ [4001] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [4011] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [4021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [4031] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4041] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4051] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat"
+ [4061] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "blue" "grat"
+ [4071] "grat" "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat"
+ [4081] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4101] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4111] "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4121] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat"
+ [4131] "grat" "grat" "blue" "blue" "grat" "grat" "blue" "grat" "grat" "grat"
+ [4141] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4151] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4161] "grat" "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat"
+ [4171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4181] "blue" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat"
+ [4191] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4201] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4211] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4221] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4231] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [4241] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4251] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4261] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [4271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4281] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [4291] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4301] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4311] "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [4321] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4331] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4341] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4351] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat"
+ [4361] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [4371] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4381] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4391] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4401] "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [4411] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4421] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4431] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4441] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4451] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [4461] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4471] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4481] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4491] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4501] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4511] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4521] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4531] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [4541] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [4551] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4571] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4591] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4601] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4611] "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4621] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4631] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [4641] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4651] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [4661] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "blue"
+ [4671] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue"
+ [4681] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4711] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4721] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [4731] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [4741] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4751] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4761] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4771] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4781] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4791] "blue" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [4801] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat"
+ [4811] "grat" "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat" "blue"
+ [4821] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4831] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [4841] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4851] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4861] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4871] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4881] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4891] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4901] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4911] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [4921] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4931] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4941] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4951] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4961] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4971] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [4981] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [4991] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5001] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [5011] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue"
+ [5021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5031] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [5041] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [5051] "grat" "grat" "grat" "grat" "blue" "blue" "blue" "grat" "grat" "grat"
+ [5061] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5071] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5081] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [5091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5101] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5111] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5121] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5131] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5141] "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5151] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5161] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5181] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5191] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5201] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5211] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5221] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5231] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5241] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5251] "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5261] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5291] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5301] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5311] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5321] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5331] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5341] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5351] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5361] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [5371] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "blue"
+ [5381] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5391] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5401] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5411] "grat" "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [5421] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [5431] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5441] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [5451] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5461] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5471] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5481] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [5491] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [5501] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5511] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5521] "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5531] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5541] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5551] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5571] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5581] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5591] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [5601] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5611] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5621] "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat"
+ [5631] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue"
+ [5641] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5651] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5661] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5671] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5681] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [5691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5711] "grat" "grat" "grat" "blue" "blue" "grat" "grat" "blue" "grat" "grat"
+ [5721] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5731] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5741] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5751] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5761] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [5771] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5781] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5791] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5801] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5811] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5821] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5831] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5841] "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "blue"
+ [5851] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5861] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5871] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5881] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5891] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat"
+ [5901] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5911] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5921] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5931] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue"
+ [5941] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5951] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5961] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [5971] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [5981] "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "blue" "grat"
+ [5991] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6001] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6011] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6031] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6041] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6051] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6061] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6071] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6081] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6101] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6111] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6121] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [6131] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue"
+ [6141] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6151] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6161] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [6171] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6181] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6191] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6201] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6211] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6221] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [6231] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [6241] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6251] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6261] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6291] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6301] "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [6311] "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6321] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6331] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6341] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6351] "grat" "blue" "blue" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [6361] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [6371] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [6381] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6391] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [6401] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6411] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat" "grat"
+ [6421] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6431] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6441] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6451] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [6461] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6471] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [6481] "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat" "blue"
+ [6491] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6501] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6511] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6521] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6531] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6541] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6551] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6561] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6571] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [6581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6591] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [6601] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6611] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [6621] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6631] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6641] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6651] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6661] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6671] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6681] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6711] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6721] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6731] "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [6741] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6751] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [6761] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6771] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6781] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6791] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6801] "blue" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [6811] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6821] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6831] "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [6841] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6851] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [6861] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [6871] "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6881] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [6891] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [6901] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [6911] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6921] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6931] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6941] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6951] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6961] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [6971] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [6981] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [6991] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7001] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7011] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [7021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7031] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7041] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7051] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7061] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [7071] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [7081] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [7091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7101] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7111] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7121] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [7131] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7141] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7151] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [7161] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [7171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue"
+ [7181] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "blue"
+ [7191] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7201] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "blue" "blue"
+ [7211] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7221] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7231] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [7241] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [7251] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7261] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7291] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7301] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7311] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7321] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [7331] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7341] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [7351] "grat" "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7361] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [7371] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7381] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7391] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [7401] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7411] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [7421] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7431] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7441] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7451] "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7461] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [7471] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7481] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [7491] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [7501] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat"
+ [7511] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7521] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [7531] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7541] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7551] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7571] "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat"
+ [7581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7591] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7601] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [7611] "blue" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7621] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7631] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7641] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7651] "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7661] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [7671] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [7681] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [7701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [7711] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7721] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7731] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7741] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7751] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7761] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [7771] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat"
+ [7781] "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [7791] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7801] "grat" "grat" "grat" "grat" "blue" "blue" "grat" "blue" "grat" "grat"
+ [7811] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7821] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7831] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7841] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7851] "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "blue"
+ [7861] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7871] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [7881] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat"
+ [7891] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7901] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [7911] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7921] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7931] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue"
+ [7941] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7951] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7961] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7971] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [7981] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [7991] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8001] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8011] "grat" "grat" "grat" "blue" "blue" "blue" "grat" "grat" "blue" "grat"
+ [8021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8031] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8041] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8051] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8061] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8071] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8081] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8101] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8111] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [8121] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8131] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [8141] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8151] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8161] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8181] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8191] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [8201] "blue" "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [8211] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8221] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue"
+ [8231] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8241] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [8251] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8261] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8291] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8301] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [8311] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [8321] "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [8331] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8341] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8351] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat"
+ [8361] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8371] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8381] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8391] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [8401] "grat" "grat" "grat" "blue" "blue" "blue" "grat" "grat" "grat" "grat"
+ [8411] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8421] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8431] "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8441] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8451] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8461] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8471] "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [8481] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8491] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [8501] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [8511] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8521] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8531] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [8541] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8551] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8571] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8581] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8591] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8601] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8611] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8621] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8631] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8641] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [8651] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8661] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8671] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8681] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8691] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8711] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8721] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8731] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8741] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8751] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [8761] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8771] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8781] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8791] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8801] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8811] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [8821] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8831] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [8841] "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8851] "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [8861] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [8871] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [8881] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8891] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8901] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [8911] "grat" "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [8921] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [8931] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [8941] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat"
+ [8951] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [8961] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "blue" "blue" "grat"
+ [8971] "blue" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [8981] "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [8991] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9001] "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat" "grat" "grat"
+ [9011] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [9021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9031] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [9041] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [9051] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9061] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9071] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9081] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9101] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9111] "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9121] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [9131] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [9141] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue"
+ [9151] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9161] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9171] "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9181] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [9191] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [9201] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9211] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [9221] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9231] "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [9241] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9251] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9261] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [9271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9281] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9291] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9301] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9311] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9321] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9331] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [9341] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [9351] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9361] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9371] "grat" "grat" "grat" "blue" "grat" "blue" "grat" "grat" "grat" "grat"
+ [9381] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "blue"
+ [9391] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [9401] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [9411] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9421] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9431] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9441] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9451] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [9461] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9471] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9481] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [9491] "grat" "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9501] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9511] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [9521] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9531] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "blue" "grat"
+ [9541] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9551] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9571] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9581] "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [9591] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9601] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9611] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9621] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9631] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "blue"
+ [9641] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9651] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+ [9661] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9671] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9681] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat"
+ [9691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9711] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9721] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9731] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [9741] "grat" "blue" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat"
+ [9751] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9761] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9771] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [9781] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [9791] "grat" "grat" "grat" "blue" "grat" "grat" "blue" "grat" "blue" "grat"
+ [9801] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9811] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9821] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9831] "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+ [9841] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9851] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [9861] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9871] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9881] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+ [9891] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9901] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [9911] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9921] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+ [9931] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9941] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue"
+ [9951] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+ [9961] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+ [9971] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+ [9981] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat"
+ [9991] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[10001] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[10011] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[10021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10031] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[10041] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10051] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10061] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat"
+[10071] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10081] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[10091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10101] "grat" "grat" "blue" "blue" "grat" "blue" "grat" "grat" "grat" "grat"
+[10111] "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10121] "grat" "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat"
+[10131] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10141] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[10151] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10161] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10181] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10191] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10201] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[10211] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10221] "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[10231] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10241] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10251] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10261] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10291] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10301] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[10311] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[10321] "grat" "grat" "grat" "grat" "grat" "blue" "blue" "blue" "grat" "grat"
+[10331] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10341] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10351] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10361] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[10371] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[10381] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[10391] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10401] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[10411] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10421] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "blue"
+[10431] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10441] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10451] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10461] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10471] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[10481] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10491] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[10501] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[10511] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10521] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[10531] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10541] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10551] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10571] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10591] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[10601] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10611] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10621] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10631] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[10641] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10651] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[10661] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10671] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "blue"
+[10681] "blue" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat"
+[10691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[10701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[10711] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10721] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10731] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[10741] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10751] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[10761] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10771] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10781] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "blue" "grat"
+[10791] "grat" "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[10801] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[10811] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[10821] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10831] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[10841] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10851] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10861] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[10871] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10881] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10891] "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10901] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10911] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10921] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[10931] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10941] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10951] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[10961] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10971] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10981] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[10991] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11001] "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat"
+[11011] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11031] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11041] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11051] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11061] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[11071] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[11081] "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[11091] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[11101] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11111] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11121] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11131] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11141] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11151] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11161] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11181] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[11191] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[11201] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11211] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11221] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11231] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11241] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11251] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[11261] "grat" "grat" "grat" "grat" "blue" "blue" "blue" "grat" "grat" "grat"
+[11271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11291] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11301] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11311] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "blue"
+[11321] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[11331] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[11341] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11351] "grat" "grat" "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[11361] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11371] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11381] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11391] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11401] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11411] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11421] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[11431] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[11441] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11451] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[11461] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11471] "grat" "grat" "blue" "grat" "grat" "blue" "blue" "grat" "grat" "grat"
+[11481] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue"
+[11491] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[11501] "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat"
+[11511] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11521] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11531] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11541] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[11551] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11571] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11591] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11601] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11611] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11621] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11631] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[11641] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[11651] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[11661] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[11671] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[11681] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11691] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[11701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11711] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[11721] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[11731] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11741] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat"
+[11751] "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[11761] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11771] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[11781] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11791] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11801] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[11811] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11821] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11831] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11841] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11851] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11861] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11871] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11881] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11891] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[11901] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11911] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[11921] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11931] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[11941] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11951] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11961] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11971] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11981] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[11991] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12001] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12011] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12021] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[12031] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[12041] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12051] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12061] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12071] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[12081] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12101] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[12111] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12121] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12131] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12141] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[12151] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12161] "grat" "blue" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[12171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12181] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12191] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12201] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12211] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[12221] "grat" "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[12231] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12241] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12251] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12261] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[12271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12291] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12301] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12311] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12321] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12331] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12341] "grat" "grat" "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[12351] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12361] "blue" "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat" "grat"
+[12371] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[12381] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12391] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12401] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12411] "grat" "blue" "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat"
+[12421] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12431] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12441] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12451] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12461] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[12471] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[12481] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12491] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12501] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[12511] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12521] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12531] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12541] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12551] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[12571] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12591] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12601] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12611] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12621] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12631] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[12641] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[12651] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12661] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12671] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12681] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12711] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12721] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12731] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12741] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[12751] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12761] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12771] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12781] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[12791] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12801] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[12811] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12821] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12831] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12841] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12851] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12861] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12871] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12881] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12891] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12901] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[12911] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12921] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12931] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12941] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12951] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12961] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[12971] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[12981] "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat"
+[12991] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13001] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[13011] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[13021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13031] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[13041] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13051] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13061] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13071] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat" "grat"
+[13081] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "blue" "grat"
+[13091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue"
+[13101] "blue" "blue" "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[13111] "blue" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat"
+[13121] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13131] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13141] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13151] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13161] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat"
+[13171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13181] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[13191] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13201] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13211] "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[13221] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[13231] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13241] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[13251] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13261] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[13271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13291] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[13301] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13311] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13321] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13331] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13341] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13351] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13361] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13371] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13381] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13391] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13401] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13411] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13421] "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "blue" "blue"
+[13431] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[13441] "grat" "grat" "blue" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[13451] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13461] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13471] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[13481] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13491] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[13501] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue"
+[13511] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13521] "grat" "grat" "grat" "blue" "grat" "blue" "grat" "grat" "grat" "grat"
+[13531] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13541] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13551] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13571] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13591] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13601] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13611] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "blue" "grat"
+[13621] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13631] "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat"
+[13641] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[13651] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13661] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13671] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13681] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13701] "grat" "grat" "grat" "blue" "grat" "blue" "grat" "grat" "grat" "grat"
+[13711] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13721] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13731] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[13741] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13751] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[13761] "grat" "grat" "grat" "blue" "grat" "blue" "blue" "grat" "grat" "grat"
+[13771] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[13781] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13791] "blue" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[13801] "blue" "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat" "grat"
+[13811] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13821] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13831] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13841] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[13851] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13861] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13871] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[13881] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[13891] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13901] "grat" "blue" "grat" "blue" "grat" "grat" "grat" "blue" "blue" "grat"
+[13911] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[13921] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13931] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13941] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13951] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13961] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13971] "blue" "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[13981] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[13991] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[14001] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14011] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[14021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14031] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14041] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14051] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[14061] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14071] "grat" "grat" "blue" "grat" "blue" "grat" "blue" "grat" "grat" "grat"
+[14081] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[14091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14101] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14111] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14121] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[14131] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[14141] "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat"
+[14151] "blue" "grat" "blue" "grat" "blue" "grat" "grat" "blue" "grat" "blue"
+[14161] "grat" "grat" "grat" "grat" "blue" "grat" "blue" "grat" "grat" "grat"
+[14171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14181] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14191] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14201] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14211] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14221] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14231] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14241] "grat" "grat" "grat" "grat" "blue" "blue" "grat" "grat" "grat" "grat"
+[14251] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14261] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14281] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14291] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14301] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14311] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14321] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14331] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[14341] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[14351] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[14361] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14371] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14381] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14391] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[14401] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14411] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[14421] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14431] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14441] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[14451] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14461] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14471] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[14481] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[14491] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14501] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[14511] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[14521] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14531] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[14541] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14551] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14571] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14591] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14601] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[14611] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[14621] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[14631] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14641] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14651] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[14661] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[14671] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[14681] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[14691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "blue"
+[14701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14711] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14721] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14731] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[14741] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14751] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14761] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14771] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14781] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14791] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[14801] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14811] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14821] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14831] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14841] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14851] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14861] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14871] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14881] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14891] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14901] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14911] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14921] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14931] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[14941] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14951] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14961] "blue" "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[14971] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14981] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[14991] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15001] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[15011] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[15021] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15031] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15041] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15051] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[15061] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[15071] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15081] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15091] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15101] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15111] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15121] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15131] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15141] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15151] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15161] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[15171] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15181] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15191] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15201] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15211] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15221] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[15231] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[15241] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15251] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15261] "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[15271] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue"
+[15281] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15291] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15301] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[15311] "grat" "grat" "grat" "grat" "grat" "blue" "blue" "blue" "grat" "grat"
+[15321] "blue" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat"
+[15331] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15341] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15351] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15361] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15371] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15381] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[15391] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[15401] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15411] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15421] "grat" "grat" "grat" "blue" "blue" "grat" "blue" "grat" "grat" "grat"
+[15431] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15441] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15451] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[15461] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15471] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15481] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[15491] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15501] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15511] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15521] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15531] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15541] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15551] "blue" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[15561] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15571] "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15581] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15591] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15601] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[15611] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15621] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15631] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15641] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[15651] "grat" "grat" "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat"
+[15661] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat"
+[15671] "grat" "grat" "blue" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[15681] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat"
+[15691] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15701] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15711] "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat"
+[15721] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15731] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15741] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[15751] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "blue"
+[15761] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15771] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15781] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[15791] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15801] "grat" "blue" "grat" "grat" "grat" "blue" "grat" "grat" "grat" "blue"
+[15811] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15821] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[15831] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15841] "grat" "grat" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15851] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15861] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15871] "grat" "grat" "grat" "grat" "grat" "grat" "blue" "grat" "grat" "grat"
+[15881] "grat" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15891] "grat" "blue" "blue" "blue" "grat" "grat" "grat" "grat" "grat" "grat"
+[15901] "grat" "grat" "grat" "blue" "blue" "blue" "grat" "grat" "grat" "grat"
+[15911] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15921] "grat" "grat" "grat" "blue" "grat" "blue" "grat" "grat" "blue" "grat"
+[15931] "blue" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15941] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15951] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15961] "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat" "grat"
+[15971] "grat" "grat" "grat" "grat" "grat"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(res) <span class="sc">+</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(log2FoldChange, <span class="sc">-</span><span class="fu">log</span>(padj)) <span class="sc">+</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Log2(FoldChange)"</span>) <span class="sc">+</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"-Log(P-value)"</span>) <span class="sc">+</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>,<span class="dv">2</span>), <span class="at">col =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="sc">-</span><span class="fu">log</span>(<span class="fl">0.05</span>), <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1237 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="class14_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="add-annotation-data" class="level2">
+<h2 class="anchored" data-anchor-id="add-annotation-data">Add annotation data</h2>
+<p>Add gene symbol and entrez ids</p>
+<blockquote class="blockquote">
+<p>Q. Use the mapIDs() function multiple times to add SYMBOL, ENTREZID and GENENAME annotation to our results by completing the code below.</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"AnnotationDbi"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'AnnotationDbi' was built under R version 4.5.2</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"org.Hs.eg.db"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code></code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">columns</span>(org.Hs.eg.db)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "ACCNUM"       "ALIAS"        "ENSEMBL"      "ENSEMBLPROT"  "ENSEMBLTRANS"
+ [6] "ENTREZID"     "ENZYME"       "EVIDENCE"     "EVIDENCEALL"  "GENENAME"    
+[11] "GENETYPE"     "GO"           "GOALL"        "IPI"          "MAP"         
+[16] "OMIM"         "ONTOLOGY"     "ONTOLOGYALL"  "PATH"         "PFAM"        
+[21] "PMID"         "PROSITE"      "REFSEQ"       "SYMBOL"       "UCSCKG"      
+[26] "UNIPROT"     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>symbol <span class="ot">=</span> <span class="fu">mapIds</span>(org.Hs.eg.db,</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">keys=</span><span class="fu">row.names</span>(res), </span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">keytype=</span><span class="st">"ENSEMBL"</span>,</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">column=</span><span class="st">"SYMBOL"</span>,</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">multiVals=</span><span class="st">"first"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>'select()' returned 1:many mapping between keys and columns</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>entrez <span class="ot">=</span> <span class="fu">mapIds</span>(org.Hs.eg.db,</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">keys=</span><span class="fu">row.names</span>(res),</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">keytype=</span><span class="st">"ENSEMBL"</span>,</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">column=</span><span class="st">"ENTREZID"</span>,</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">multiVals=</span><span class="st">"first"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>'select()' returned 1:many mapping between keys and columns</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>name <span class="ot">=</span>   <span class="fu">mapIds</span>(org.Hs.eg.db,</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">keys=</span><span class="fu">row.names</span>(res),</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">keytype=</span><span class="st">"ENSEMBL"</span>,</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">column=</span><span class="st">"GENENAME"</span>,</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">multiVals=</span><span class="st">"first"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>'select()' returned 1:many mapping between keys and columns</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(res, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>log2 fold change (MLE): condition hoxa1_kd vs control_sirna 
+Wald test p-value: condition hoxa1 kd vs control sirna 
+DataFrame with 10 rows and 9 columns
+                   baseMean log2FoldChange     lfcSE       stat      pvalue
+                  &lt;numeric&gt;      &lt;numeric&gt; &lt;numeric&gt;  &lt;numeric&gt;   &lt;numeric&gt;
+ENSG00000279457   29.913579      0.1792571 0.3248215   0.551863 5.81042e-01
+ENSG00000187634  183.229650      0.4264571 0.1402658   3.040350 2.36304e-03
+ENSG00000188976 1651.188076     -0.6927205 0.0548465 -12.630156 1.43993e-36
+ENSG00000187961  209.637938      0.7297556 0.1318599   5.534326 3.12428e-08
+ENSG00000187583   47.255123      0.0405765 0.2718928   0.149237 8.81366e-01
+ENSG00000187642   11.979750      0.5428105 0.5215598   1.040744 2.97994e-01
+ENSG00000188290  108.922128      2.0570638 0.1969053  10.446970 1.51281e-25
+ENSG00000187608  350.716868      0.2573837 0.1027266   2.505522 1.22271e-02
+ENSG00000188157 9128.439422      0.3899088 0.0467164   8.346302 7.04333e-17
+ENSG00000237330    0.158192      0.7859552 4.0804729   0.192614 8.47261e-01
+                       padj      symbol      entrez                   name
+                  &lt;numeric&gt; &lt;character&gt; &lt;character&gt;            &lt;character&gt;
+ENSG00000279457 6.86555e-01          NA          NA                     NA
+ENSG00000187634 5.15718e-03      SAMD11      148398 sterile alpha motif ..
+ENSG00000188976 1.76553e-35       NOC2L       26155 NOC2 like nucleolar ..
+ENSG00000187961 1.13413e-07      KLHL17      339451 kelch like family me..
+ENSG00000187583 9.19031e-01     PLEKHN1       84069 pleckstrin homology ..
+ENSG00000187642 4.03379e-01       PERM1       84808 PPARGC1 and ESRR ind..
+ENSG00000188290 1.30538e-24        HES4       57801 hes family bHLH tran..
+ENSG00000187608 2.37452e-02       ISG15        9636 ISG15 ubiquitin like..
+ENSG00000188157 4.21970e-16        AGRN      375790                  agrin
+ENSG00000237330          NA      RNF223      401934 ring finger protein ..</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Q. Finally for this section let’s reorder these results by adjusted p-value and save them to a CSV file in your current project directory.</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">=</span> res[<span class="fu">order</span>(res<span class="sc">$</span>pvalue),]</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(res, <span class="at">file=</span><span class="st">"deseq_results.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="pathway-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="pathway-analysis">Pathway Analysis</h2>
+<p>KEGG, GO and REACTOME</p>
+<section id="reactome" class="level3">
+<h3 class="anchored" data-anchor-id="reactome">REACTOME</h3>
+<p>There is an R package for this analysis and a new-ish website https://reactome.org/</p>
+<p>To use the website you can paste</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>sig_genes <span class="ot">&lt;-</span> res[res<span class="sc">$</span>padj <span class="sc">&lt;=</span> <span class="fl">0.05</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(res<span class="sc">$</span>padj), <span class="st">"symbol"</span>]</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Total number of significant genes:"</span>, <span class="fu">length</span>(sig_genes)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Total number of significant genes: 8147"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.table</span>(sig_genes, <span class="at">file=</span><span class="st">"significant_genes.txt"</span>, <span class="at">row.names=</span><span class="cn">FALSE</span>, <span class="at">col.names=</span><span class="cn">FALSE</span>, <span class="at">quote=</span><span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><img src="Screenshot%202026-05-14%20at%2012.58.22%20PM.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="save-our-results" class="level2">
+<h2 class="anchored" data-anchor-id="save-our-results">Save our results</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(res, <span class="at">file =</span> <span class="st">"myresults_annotated.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
