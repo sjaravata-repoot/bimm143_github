@@ -25,3 +25,7 @@ Class 13: [Transcriptomics, RNA-Seq analysis, and the interpretation of gene lis
 
 Class 14: [Project: RNA-Seq mini project](class14/class14.md)
 
+Class 18: [Project: Investigating pertussis resurgence mini-project](class18/class18.md)
+
+Class 19: [Project: Cancer mutation analysis mini-project](class19/class19.pdf)
+
